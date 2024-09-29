@@ -1,0 +1,78 @@
+-- Gem Spawner Script
+
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local gemTemplate = game.ServerStorage:WaitForChild("Gem")  -- Adjust this path to your gem template
+
+-- Function to spawn gems
+local function spawnGems(amount)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    for i = 1, amount do
+        local newGem = gemTemplate:Clone()  -- Clone the gem template
+        newGem.Position = humanoidRootPart.Position + Vector3.new(i, 0, 0)  -- Adjust position to spawn beside the player
+        newGem.Parent = game.Workspace.Gems  -- Change this path as necessary
+    end
+end
+
+-- Create a GUI for spawning gems
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local spawnButton = Instance.new("TextButton")
+local inputBox = Instance.new("TextBox")
+local label = Instance.new("TextLabel")
+
+-- Frame properties
+frame.Size = UDim2.new(0.25, 0, 0.25, 0)
+frame.Position = UDim2.new(0.5, -125, 0.5, -125)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.Visible = false  -- Start hidden
+frame.Parent = screenGui
+
+-- Label properties
+label.Size = UDim2.new(1, 0, 0.2, 0)
+label.Position = UDim2.new(0, 0, 0, 0)
+label.Text = "Enter Number of Gems to Spawn:"
+label.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+label.Parent = frame
+
+-- Input Box properties
+inputBox.Size = UDim2.new(1, 0, 0.2, 0)
+inputBox.Position = UDim2.new(0, 0, 0.2, 0)
+inputBox.PlaceholderText = "Amount"
+inputBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+inputBox.Parent = frame
+
+-- Spawn Button properties
+spawnButton.Size = UDim2.new(1, 0, 0.4, 0)
+spawnButton.Position = UDim2.new(0, 0, 0.5, 0)
+spawnButton.Text = "Spawn Gems"
+spawnButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+spawnButton.Parent = frame
+
+-- Connect button to spawn function
+spawnButton.MouseButton1Click:Connect(function()
+    local amount = tonumber(inputBox.Text)  -- Convert input to a number
+    if amount and amount > 0 then  -- Check if the amount is valid
+        spawnGems(amount)
+    else
+        warn("Please enter a valid number greater than 0.")  -- Notify if input is invalid
+    end
+end)
+
+-- Function to toggle the GUI visibility
+local function toggleGui()
+    frame.Visible = not frame.Visible
+end
+
+-- Connect the "P" key to toggle the GUI
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.P then
+        toggleGui()
+    end
+end)
+
+-- Parent the GUI to the player's PlayerGui
+screenGui.Parent = player:WaitForChild("PlayerGui")
